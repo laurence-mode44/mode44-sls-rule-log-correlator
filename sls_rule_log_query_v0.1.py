@@ -262,15 +262,14 @@ def run():
     client_secret = getpass.getpass("SLS Client Secret: ").strip()
     tsg_id = console.input("TSG ID: ").strip()
 
-   # Log type (optional filter)
-   log_type = console.input("Log type filter (e.g., traffic, threat) or leave blank for all: ").strip()
+    # Log type (optional filter)
+    log_type = console.input("Log type filter (e.g., traffic, threat) or leave blank for all: ").strip()
 
-   # Token acquisition using App Hub endpoint
-   console.print("\n[bold]Obtaining access token (auth.apps.paloaltonetworks.com)...[/bold]")
-   token = oauth2_token(client_id, client_secret, tsg_id, verify_ssl)
-   auth = AuthContext(token=token, base_url=base_url, verify_ssl=verify_ssl)
-   console.print("[green]Token acquired successfully.[/green]\n")
-
+    # Token acquisition using App Hub endpoint
+    console.print("\n[bold]Obtaining access token (auth.apps.paloaltonetworks.com)...[/bold]")
+    token = oauth2_token(client_id, client_secret, tsg_id, verify_ssl)
+    auth = AuthContext(token=token, base_url=base_url, verify_ssl=verify_ssl)
+    console.print("[green]Token acquired successfully.[/green]\n")
 
     # Time windows
     windows = build_time_windows(months=12, window_days=30)
@@ -339,6 +338,7 @@ def run():
     t.add_row(str(summary_path.resolve()), "Per-UUID per-window counts (12×30d)")
     t.add_row(str((Path.cwd() / 'rawlogs').resolve()), "Raw JSONL logs per UUID per window")
     console.print(t)
+
 
 if __name__ == "__main__":
     try:
