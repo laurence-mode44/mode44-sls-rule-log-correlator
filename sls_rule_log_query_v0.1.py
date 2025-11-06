@@ -258,18 +258,18 @@ def run():
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     # OAuth2 credentials
-client_id = console.input("SLS Client ID: ").strip()
-client_secret = getpass.getpass("SLS Client Secret: ").strip()
-tsg_id = console.input("TSG ID: ").strip()
+    client_id = console.input("SLS Client ID: ").strip()
+    client_secret = getpass.getpass("SLS Client Secret: ").strip()
+    tsg_id = console.input("TSG ID: ").strip()
 
-# Log type (optional filter)
-log_type = console.input("Log type filter (e.g., traffic, threat) or leave blank for all: ").strip()
+   # Log type (optional filter)
+   log_type = console.input("Log type filter (e.g., traffic, threat) or leave blank for all: ").strip()
 
-# Token acquisition using App Hub endpoint
-console.print("\n[bold]Obtaining access token (auth.apps.paloaltonetworks.com)...[/bold]")
-token = oauth2_token(client_id, client_secret, tsg_id, verify_ssl)
-auth = AuthContext(token=token, base_url=base_url, verify_ssl=verify_ssl)
-console.print("[green]Token acquired successfully.[/green]\n")
+   # Token acquisition using App Hub endpoint
+   console.print("\n[bold]Obtaining access token (auth.apps.paloaltonetworks.com)...[/bold]")
+   token = oauth2_token(client_id, client_secret, tsg_id, verify_ssl)
+   auth = AuthContext(token=token, base_url=base_url, verify_ssl=verify_ssl)
+   console.print("[green]Token acquired successfully.[/green]\n")
 
 
     # Time windows
