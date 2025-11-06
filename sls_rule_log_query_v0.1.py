@@ -131,15 +131,22 @@ def get_region_base_url_interactive() -> str:
         console.print("[yellow]Invalid selection. Defaulting to 'eu' region.[/yellow]")
         return REGIONS["eu"].rstrip("/")
 
-def oauth2_token(client_id: str, client_secret: str, verify_ssl: bool) -> str:
-    """Obtain OAuth2 bearer token for SLS. Adjust payload if your tenant requires different fields."""
+# --- OAuth2 configuration (App Hub / auth.apps) ---
+TOKEN_URL = "https://auth.apps.paloaltonetworks.com/oauth2/access_token"
+
+def oauth2_token(client_id: str, client_secret: str, tsg_id: str, verify_ssl: bool) -> str:
+    """
+    Obtain OAuth2 bearer token from auth.apps.paloaltonetworks.com
+    using grant_type=client_credentials and scope=tsg_id:<TSG_ID>.
+    """
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
     data = {
         "grant_type": "client_credentials",
-        # Some tenants expect scope. Uncomment/adjust if needed:
-        # "scope": "logging-service:read",
+        "scope": f"tsg_id:{tsg_id}"
     }
     resp = requests.post(
         TOKEN_URL,
+        headers=headers,
         data=data,
         auth=(client_id, client_secret),
         timeout=30,
@@ -148,11 +155,10 @@ def oauth2_token(client_id: str, client_secret: str, verify_ssl: bool) -> str:
     if resp.status_code != 200:
         console.print(f"[red]Token request failed ({resp.status_code}):[/red] {resp.text}")
         sys.exit(1)
-    payload = resp.json()
-    token = payload.get("access_token") or payload.get("accessToken")
+    token = resp.json().get("access_token")
     if not token:
         console.print("[red]No access_token in token response.[/red]")
-        console.print(json.dumps(payload, indent=2))
+        console.print(resp.text)
         sys.exit(1)
     return token
 
@@ -252,17 +258,19 @@ def run():
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     # OAuth2 credentials
-    client_id = console.input("SLS Client ID: ").strip()
-    client_secret = getpass.getpass("SLS Client Secret: ").strip()
+client_id = console.input("SLS Client ID: ").strip()
+client_secret = getpass.getpass("SLS Client Secret: ").strip()
+tsg_id = console.input("TSG ID: ").strip()
 
-    # Log type (optional filter)
-    log_type = console.input("Log type filter (e.g., traffic, threat) or leave blank for all: ").strip()
+# Log type (optional filter)
+log_type = console.input("Log type filter (e.g., traffic, threat) or leave blank for all: ").strip()
 
-    # Token
-    console.print("\n[bold]Obtaining access token...[/bold]")
-    token = oauth2_token(client_id, client_secret, verify_ssl)
-    auth = AuthContext(token=token, base_url=base_url, verify_ssl=verify_ssl)
-    console.print("[green]Token acquired.[/green]\n")
+# Token acquisition using App Hub endpoint
+console.print("\n[bold]Obtaining access token (auth.apps.paloaltonetworks.com)...[/bold]")
+token = oauth2_token(client_id, client_secret, tsg_id, verify_ssl)
+auth = AuthContext(token=token, base_url=base_url, verify_ssl=verify_ssl)
+console.print("[green]Token acquired successfully.[/green]\n")
+
 
     # Time windows
     windows = build_time_windows(months=12, window_days=30)
