@@ -1,4 +1,5 @@
 # Mode44 SLS Rule Log Correlator
+**Currently NON-Functional**
 
 **Author:** Laurence Curling – Mode44 Ltd  
 **License:** MIT  
